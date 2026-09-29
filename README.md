@@ -15,16 +15,21 @@ quem decide com ele: **usar média ou percentil?**
 
 ### Por que este assunto
 
-> ⬜ **A COMPLETAR com as suas palavras** — 3 a 5 linhas. O material está na seção 3.0: você já
-> tomou uma decisão errada lendo o próprio dado. O objetivo aqui não é aprender o que são as
-> métricas, é estabelecer **quando cada leitura engana**.
+Eu já instrumento fluxo na prática: opero um board em Jira com JQL e acompanho Lead Time,
+Throughput, Aging e WIP. Mesmo assim, li errado os meus próprios números — chamei de "média" um
+valor que era o percentil 85, e quase dobrei o prazo que usava para decidir quando desistir de um
+processo (seção 3.0).
+
+O problema não era falta de dado, era **falta de precisão sobre qual estatística responde qual
+pergunta**. Este caderno existe para fechar esse buraco na fonte, não em resumo de terceiro: ir ao
+texto canônico, ver o que ele de fato prescreve, e descobrir onde cada leitura engana.
 
 ### Objetivos de estudo
 
 - [x] Fixar a definição **canônica** das quatro métricas obrigatórias, na fonte, sem intermediário
 - [x] Entender por que a média de Lead Time induz a erro e o que o percentil resolve
 - [x] Testar a **confiabilidade do NotebookLM** quando as fontes discordam entre si
-- [ ] Saber ler um **scatterplot de Cycle Time** e extrair p50 / p85 dele
+- [x] Saber ler um **scatterplot de Cycle Time** e o que uma linha de percentil promete — e o que não
 - [x] Produzir um conjunto de **prompts reutilizáveis** para revisar o tema sem recomeçar do zero
 
 ---
@@ -208,7 +213,40 @@ Quem reporta "lead time médio" está usando uma estatística que a fonte nunca 
 - **Percentil por nearest-rank:** ordena-se a amostra e toma-se a posição correspondente. Com
   amostra pequena, **um único caso novo move o p85** — por isso o número deve ser recalculado.
 
-> ⬜ **A COMPLETAR:** ler um scatterplot de Cycle Time e extrair p50/p85 dele (fontes 4 e 5).
+#### Como se lê um scatterplot de Cycle Time
+
+> *"For each date (on the X axis) it marks Cycle Time (Y axis) of all items that were completed
+> that day."* — Scrum.org, fonte 4
+
+Cada ponto é **um item concluído**: a data da conclusão no eixo X, o tempo que ele levou no eixo Y.
+A nuvem parece caótica de propósito — **ela é caótica**, e é isso que o gráfico tem a dizer. As
+linhas de percentil, traçadas por cima, são o que transforma a nuvem em decisão.
+
+A leitura correta de uma linha de p85 em 16 dias, nas palavras da fonte:
+
+> *"a usual right-sized work item entering your system has a probability of 85% of being completed
+> in less than 16 days. On the flip side, it also means that out of 100 items entering your system
+> about 15 will take more than 16 days to complete."*
+
+⭐ **Repare no segundo lado.** O p85 não promete que tudo fica pronto em 16 dias — ele avisa que
+**15 em cada 100 vão estourar**. Quem só lê a primeira metade da frase usa a métrica como promessa,
+que é o uso errado.
+
+#### ⚠️ Qual percentil usar é uma DECISÃO, não um dado
+
+As fontes deste caderno não concordam entre si, e a divergência é informativa:
+
+| Fonte | Percentis usados |
+|---|---|
+| Kanban Guide (SLE) | exemplo com **85%** |
+| Scrum.org / ActionableAgile | calcula **50, 70, 85 e 95** por padrão |
+| Plataformatec | usa **75 e 95** no exemplo prático |
+
+Não existe percentil "certo". O que existe é **quanto risco você aceita** ao se comprometer com um
+prazo. Escolher o p85 é dizer: aceito errar em 15% dos casos.
+
+⚠️ **E há um alerta de uso na fonte 4:** o PSK trata o SLE como indicador **de time**, e recomenda
+pensar duas vezes antes de compartilhá-lo fora dele — porque vira meta, e meta vira pressão.
 
 ### 4.2 Glossário
 
@@ -223,9 +261,9 @@ Quem reporta "lead time médio" está usando uma estatística que a fonte nunca 
 | **Percentil** | Valor abaixo do qual cai uma dada porcentagem das observações. ⚠️ **Termo ausente do Kanban Guide**, embora o SLE seja um enunciado de percentil | fontes 4 e 5 |
 | **p50 / mediana** | Metade das observações está abaixo | fontes 4 e 5 |
 | **p85** | 85% das observações estão abaixo; é o valor usado no exemplo de SLE do próprio guia | Kanban Guide (implícito) + fonte 4 |
-| **Lead Time** | ⬜ a completar — ⚠️ **não é termo do Kanban Guide**, que usa Cycle Time | fonte 5 |
-| **Scatterplot de Cycle Time** | ⬜ a completar | fonte 4 |
-| **CFD** (Cumulative Flow Diagram) | ⬜ a completar | fonte 5 |
+| **Lead Time** | "O número de dias entre o início e o fim de uma entrega." ⚠️ **Não é termo do Kanban Guide**, que usa Cycle Time. A fonte avisa: *"para medir o lead time deve-se estabelecer os limites de começo e fim"* — sem esse acordo, o número não compara | fonte 5 |
+| **Scatterplot de Cycle Time** | Gráfico em que cada ponto é um item concluído: data no eixo X, tempo que levou no eixo Y. As linhas de percentil por cima transformam a dispersão em decisão | fonte 4 |
+| **CFD** (Cumulative Flow Diagram) | ⚠️ **lacuna da curadoria: nenhuma das cinco fontes define.** Registrado como falta, não preenchido por fora — o caderno só afirma o que as fontes sustentam | — |
 
 ### 4.3 Prompts reutilizáveis
 
